@@ -1,6 +1,10 @@
-/*TODO: Create proc struct
- *
- */
+#include <errno.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <stdint.h>
+
 #define STACK_SIZE 65536
 
 struct Proc {
@@ -17,20 +21,29 @@ struct MMU {
 
 };
 
-int main(argc, argv[]){
+int main(int argc, char** argv){
 
     uint8_t *mem = new uint8_t[67108864]; //init RAM
     int page_size; //in bytes
     //TODO: createBackingStore
 
-    //TODO: read in page size and check that it's a power of 2
 
-
-
+    if(argc == 2){
+        page_size = atoi(argv[1]);
+        if((page_size == 0) || ((page_size & (page_size - 1)) != 0)){
+            printf("Error: %d is not a power of 2.\n",page_size);
+            exit(1);
+        }
+    }
+    else{
+        printf("Error: invalid arguments.\n");
+        exit(1);
+    }
+    printf("Page size = %d bytes\n",page_size);
 
     return 0;
 }
-
+/*
 void create(){
 
 }
@@ -66,3 +79,4 @@ void getFromBackingStore(){
 void createBackingStore(){
 
 }
+ */
