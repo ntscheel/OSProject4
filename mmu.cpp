@@ -6,18 +6,18 @@
 #include <stdint.h>
 #include <time.h>
 #include <string>
+#include <vector>
 #include <iostream>
 using namespace std;
 
 #define STACK_SIZE 65536
 
 struct Proc {
-    int pid;
+	int pid;
     int text;
     int data;
     int stack;
     int num_pages;
-    Page *pages;
 };
 struct Page {
     int pid;
@@ -27,6 +27,9 @@ struct Page {
 struct MMU {
 
 };
+vector <Proc> pt_proc;
+vector <int> pt_int;
+
 int cur_pid = 1023;
 
 //Functions
@@ -41,10 +44,6 @@ int main(int argc, char** argv){
     srand(time(NULL));
 
     uint8_t *mem = new uint8_t[67108864]; //init 64MB RAM, physical memory
-
-    int procs_len = 50;
-    int procs_cur = 0;
-    Proc procs[procs_len];
 
     int page_size; //in bytes
 
@@ -104,6 +103,9 @@ int main(int argc, char** argv){
 //            for (int i = 0; i < procs_cur; ++i) {
 //                printf("PID: %d, data: %d\n",procs[i].pid,procs[i].data);
 //            }
+            for (int i = 0; i < pt_proc.size(); ++i) {
+                printf("PID #%d = %d; \n",i,pt_proc[i].pid);
+            }
         }else{
             cout << "Invalid command: " << input << "\n";
         }
@@ -121,6 +123,8 @@ Proc create(){
     ret.data = randomBetweenRange(2048, 16384);
     ret.text = randomBetweenRange(0, 1024);
     ret.stack = STACK_SIZE;
+    pt_proc.push_back(ret);
+    pt_int.push_back(cur_pid);
     return ret;
 }
 
