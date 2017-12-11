@@ -11,13 +11,30 @@ using namespace std;
 
 #define STACK_SIZE 65536
 
+struct Virtual_Addr{
+    int page_num;
+    int offset;
+};
+struct Mem_alloc {
+    char* name;
+    int size;
+    Virtual_Addr v_addr;
+};
 struct Proc {
     int pid;
-    int text;
-    int data;
-    int stack;
-    int num_pages;
-    Page *pages;
+    // make theses three the first three in the mem vector
+//    int text;
+//    int data;
+//    int stack;
+    std::vector<Mem_alloc> mem;
+//    int num_pages;
+//    Page *pages;
+};
+// entry in page table
+struct entry{
+    int pid;
+    int page_num;
+    int frame_num;
 };
 struct Page {
     int pid;
@@ -42,12 +59,9 @@ int main(int argc, char** argv){
 
     uint8_t *mem = new uint8_t[67108864]; //init 64MB RAM, physical memory
 
-    int procs_len = 50;
-    int procs_cur = 0;
-    Proc procs[procs_len];
-
+    std::vector<Proc> procs;
     int page_size; //in bytes
-
+    std::vector<entry> page_table;
     //TODO: createBackingStore
 
     //Check user arguments
@@ -114,14 +128,31 @@ int main(int argc, char** argv){
     return 0;
 }
 
-Proc create(){
+void create(std::vector<Proc> procs, int page_size){
     Proc ret;
     cur_pid++;
     ret.pid = cur_pid;
-    ret.data = randomBetweenRange(2048, 16384);
-    ret.text = randomBetweenRange(0, 1024);
-    ret.stack = STACK_SIZE;
-    return ret;
+//    ret.data = randomBetweenRange(2048, 16384);
+//    ret.text = randomBetweenRange(0, 1024);
+//    ret.stack = STACK_SIZE;
+    Mem_alloc data;
+    Mem_alloc text;
+    Mem_alloc stack;
+    data.name = "data";
+    data.size = randomBetweenRange(2048, 16384);
+    data.v_addr.page_num = 0;  // How are we going to do handle storing these?
+    data.v_addr.offset = 0;
+    text.name = "text";
+    text.size = randomBetweenRange(0, 1024);
+    text.v_addr.page_num = (data.v_addr.offset+data.size)/(page_size);
+    text.v_addr.offset = (data.v_addr.offset+data.size)%page_size;
+    stack.name = "stack";
+    stack.size = STACK_SIZE;
+    //stack.v_addr = //virtual address of text plus its size
+    ret.mem.push_back(data);
+    ret.mem.push_back(text);
+    ret.mem.push_back(stack);
+    procs.push_back(ret);
 }
 
 int randomBetweenRange(int min, int max){
