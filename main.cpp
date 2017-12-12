@@ -8,6 +8,7 @@
 #include <string.h>
 #include <vector>
 #include <iostream>
+#include <fstream>
 
 
 // compile: g++ -o mmu main.cpp -std=c++11
@@ -16,8 +17,11 @@ using namespace std;
 
 #define STACK_SIZE 65536
 int cur_pid = 1023;
-uint8_t *RAM = new uint8_t[67108864]; //init 64MB RAM, physical memory
-uint8_t *HD = new uint8_t[536870912]; //init 448MB Hard disk, backing store
+
+//Create RAM and Hard Disc file
+uint8_t *RAM; //init 64MB RAM, physical memory
+uint8_t *HD; //init 448MB Hard disk, backing store
+
 //physical address is frame_num * page_size
 //      **if this exceeds the 67108864 (64MB) then the frame is in the backing store
 //          and must be loaded loaded into mem (and something from mem loaded into
@@ -92,14 +96,12 @@ int print_mmu(std::vector<Proc>* procs);
 int print_processes(std::vector<Proc>* procs);
 int print_page (std::vector<entry>* table);
 vector<std::string> str_split(std::string input);
+void createBackingStore(int page_size);
 /*
  * ---------- Begin main() ----------
  */
 int main(int argc, char **argv) {
     srand(time(NULL));
-
-    memset(RAM, 0, sizeof(RAM)); //set all values to zero
-    memset(HD, 0, sizeof(HD)); //set all values to zero
 
     std::vector<int> frames;
     std::vector<int> pages;
@@ -120,7 +122,13 @@ int main(int argc, char **argv) {
         printf("Error: invalid arguments.\n");
         exit(1);
     }
-
+    //Create Backing store and RAM, set each to zero
+    //Each entry in these array will contain a 0 if the frame is free
+    //or a 1 if the frame is not.
+    RAM = new uint8_t[67108864/page_size];
+    HD = new uint8_t[536870912/page_size];
+    memset(RAM, 0, sizeof(RAM)); //set all values to zero
+    memset(HD, 0, sizeof(HD)); //set all values to zero
 
     //Print greeting and command list
     cout << "Welcome to the Memory Allocation Simulator! Using a page size of " << page_size << " bytes.\n";
@@ -400,13 +408,38 @@ void free (PID, var_name){
 }
 void terminate(PID){
 }
+*/
+
+/*
 void sendToBackingStore(){
 }
 void getFromBackingStore(){
 }
-void createBackingStore(){
+*/
+void createBackingStore(int page_size){
+    /*
+    if(!ifstream("Hard_Disc.txt")) {
+        ofstream store("Hard_Disc.txt");
+        if (!store) {
+            cout << "File: " << "Hard_Disc.txt" << " could not be created" << endl;
+        }
+    }else{
+        //cout << "File: Hard_Disc.txt already exists" << endl;
+
+    }
+    */
+
+    remove("Hard_Disc.txt");
+    ofstream store("Hard_Disc.txt");
+    // 536870912 set this many lines to 0
+    int i;
+    for(i=0; i<536870912/page_size; i++) {
+        store << 0 << endl;
+    }
+    store.close();
+
 }
- */
+
 //This takes a string as input and returns a vector of strings that come from splitting
 //the input on space characters. (will not include space characters in the items)
 vector<std::string> str_split(std::string input) {
