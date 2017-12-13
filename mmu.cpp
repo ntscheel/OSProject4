@@ -453,7 +453,7 @@ int free(std::vector<Proc>* procs, int PID, string var_name){
         } else if (v == procs->at(p).mem.size()-1) {
             first = (procs->at(p).mem.at(v - 1).v_addr + procs->at(p).mem.at(v - 1).size - 1) / page_size;
             first = first + 1;
-            last = 1000000000; //1 billion pages is impossible;
+            last = 2000000000; //2 billion pages is impossible;
         } else {
             first = (procs->at(p).mem.at(v - 1).v_addr + procs->at(p).mem.at(v - 1).size - 1) / page_size;
             first = first + 1;
